@@ -1,0 +1,65 @@
+<!-- Index.html -->
+tdAct.className = 'actions';
+const editBtn = document.createElement('button'); editBtn.textContent='Edit'; editBtn.onclick = () => startEdit(r['ID']);
+const delBtn = document.createElement('button'); delBtn.textContent='Delete'; delBtn.onclick = () => doDelete(r['ID']);
+tdAct.appendChild(editBtn); tdAct.appendChild(delBtn);
+tr.appendChild(tdAct);
+tbody.appendChild(tr);
+});
+table.appendChild(tbody);
+wrap.appendChild(table);
+}
+
+
+function buildForm() {
+const container = document.getElementById('formFields');
+container.innerHTML = '';
+// render inputs for each header except ID (ID auto)
+headers.forEach(h => {
+if (h.toString().toLowerCase() === 'id') return;
+const div = document.createElement('div'); div.className = 'form-row';
+const label = document.createElement('label'); label.textContent = h; div.appendChild(label);
+const input = document.createElement('input'); input.type='text'; input.id = 'fld_' + h; div.appendChild(input);
+container.appendChild(div);
+});
+}
+
+
+function onSave() {
+const obj = {};
+headers.forEach(h => {
+if (h.toString().toLowerCase() === 'id') return;
+const el = document.getElementById('fld_' + h);
+obj[h] = el ? el.value : '';
+});
+google.script.run.withSuccessHandler(resp => {
+if (!resp.success) { alert(resp.message || 'Error creating'); return; }
+reloadData();
+clearForm();
+}).createRecord(obj);
+}
+
+
+function startEdit(id) {
+editId = id;
+document.getElementById('formTitle').textContent = 'Edit Record';
+document.getElementById('saveBtn').style.display = 'none';
+document.getElementById('updateBtn').style.display = 'inline';
+// populate
+const rec = rows.find(r => r['ID'] == id);
+if (!rec) return;
+headers.forEach(h => { if (h.toString().toLowerCase() === 'id') return; const el = document.getElementById('fld_' + h); if (el) el.value = rec[h] || ''; });
+// scroll to form
+document.getElementById('rightPanel').scrollIntoView({behavior:'smooth'});
+}
+
+
+function onUpdate() {
+if (!editId) return alert('No record selected');
+const obj = {};
+headers.forEach(h => {
+if (h.toString().toLowerCase() === 'id') return;
+const el = document.getElementById('fld_' + h);
+obj[h] = el ? el.value : '';
+});
+google.
